@@ -1,0 +1,3 @@
+{"index": "00_movie", "wav_path": "./data/audios/movie.wav"}
+{"index": "01_podcast", "wav_path": "./data/audios/podcast.wav"}
+{"index": "02_meeting", "wav_path": "./data/audios/meeting.wav"}

@@ -1,0 +1,186 @@
+import os
+import json
+import numpy as np
+from vllm import SamplingParams
+from vllm.assets.audio import AudioAsset
+from vllm.multimodal.media.audio import load_audio
+from vllm.utils.argparse_utils import FlexibleArgumentParser
+
+from vllm_omni.entrypoints.omni import Omni
+
+SEED = 42
+
+sdr_system = (
+    "You are an expert in speaker diarization and automatic speech recognition."
+)
+
+# user prompt without punctuation
+# USER_QUERY = """
+#     Task: Speaker Diarization and ASR. 
+#     Rules:
+#     1. Identify each speaker and their spoken content without punctuation.
+#     2. Format each turn as: [start_time --> end_time] Speaker X: text    
+#     3. Timestamps should be precise to the millisecond (e.g., 00:00:01.234).
+#     4. Do NOT split an utterance to avoid overlap — keep each speaker turn complete.
+#     5. Handle overlapping speech by showing concurrent turns with their own time ranges.
+#     6. Output only the formatted results. No preamble, no explanation.
+# """
+
+USER_QUERY = """
+Task: Speaker Diarization and ASR. 
+    Rules:
+    1. Identify each speaker and their spoken content with punctuation.
+    2. Format each turn as: [start_time --> end_time] Speaker X: text    
+    3. Timestamps should be precise to the millisecond (e.g., 00:00:01.234).
+    4. Do NOT split an utterance to avoid overlap — keep each speaker turn complete.
+    5. Handle overlapping speech by showing concurrent turns with their own time ranges.
+    6. Output only the formatted results. No preamble, no explanation.
+<audio>
+"""
+
+
+
+def get_audio_query(audio_path: str, sampling_rate: int = 16000) -> dict:
+    """single audio inference input"""
+    prompt = (
+        f"<|im_start|>system\n{sdr_system}<|im_end|>\n"
+        "<|im_start|>user\n<|audio_start|><|audio_pad|><|audio_end|>"
+        f"{USER_QUERY}<|im_end|>\n"
+        "<|im_start|>assistant\n"
+    )
+    if not os.path.exists(audio_path):
+        raise FileNotFoundError(f"Audio file not found: {audio_path}")
+
+    audio_signal, sr = load_audio(audio_path, sr=sampling_rate)
+    audio_data = (audio_signal.astype(np.float32), sr)
+
+    return {
+        "prompt": prompt,
+        "multi_modal_data": {"audio": audio_data},
+    }
+
+
+def init_model(args):
+    omni = Omni(
+        model=args.model,
+        dtype=args.dtype,
+        stage_configs_path=args.stage_configs_path,
+        log_stats=args.log_stats,
+        stage_init_timeout=args.stage_init_timeout,
+        init_timeout=args.init_timeout,
+    )
+
+    thinker_sampling_params = SamplingParams(
+        temperature=args.temperature,
+        top_p=args.top_p,
+        top_k=args.top_k,
+        max_tokens=args.max_tokens,
+        repetition_penalty=1.05,
+        logit_bias={},
+        seed=SEED,
+    )
+
+    talker_sampling_params = SamplingParams(
+        temperature=0.9,
+        top_k=50,
+        max_tokens=4096,
+        seed=SEED,
+        detokenize=False,
+        repetition_penalty=1.05,
+        stop_token_ids=[2150],
+    )
+
+    code2wav_sampling_params = SamplingParams(
+        temperature=0.0,
+        top_p=1.0,
+        top_k=-1,
+        max_tokens=4096 * 16,
+        seed=SEED,
+        detokenize=True,
+        repetition_penalty=1.1,
+    )
+
+    all_sampling_params = [
+        thinker_sampling_params,
+        talker_sampling_params,
+        code2wav_sampling_params,
+    ]
+    num_stages = omni.num_stages
+    sampling_params_list = all_sampling_params[:num_stages]
+
+    return omni, sampling_params_list
+
+
+def decode_single(args):
+    """single audio inference and write results"""
+    # ── output file name ──
+    wav_name = os.path.splitext(os.path.basename(args.audio_path))[0]
+
+    # ── initialize model ──
+    omni, sampling_params_list = init_model(args)
+
+    # ── build input ──
+    query_input = get_audio_query(args.audio_path, args.sampling_rate)
+    prompts = [query_input for _ in range(args.num_prompts)]
+
+    # ── output directory ──
+    os.makedirs(args.output_dir, exist_ok=True)
+    jsonl_path = os.path.join(args.output_dir, f"{wav_name}.jsonl")
+
+    # ── inference ──
+    with open(jsonl_path, "w", encoding="utf-8") as jsonl_f:
+
+        omni_generator = omni.generate(
+            prompts, sampling_params_list, py_generator=args.py_generator
+        )
+
+        for stage_outputs in omni_generator:
+            output = stage_outputs.request_output
+            if stage_outputs.final_output_type == "text":
+                text_output = output.outputs[0].text
+
+                jsonl_f.write(
+                    json.dumps(
+                        {"index": wav_name, "hyp": text_output},
+                        ensure_ascii=False,
+                    ) + "\n"
+                )
+
+                jsonl_f.flush()
+
+                print(f"\n[OUTPUT]\n{text_output}")
+
+    print(f"\n[DONE] Results saved to {args.output_dir}/")
+    print(f"  JSONL: {jsonl_path}")
+
+    omni.close()
+
+
+def parse_args():
+    parser = FlexibleArgumentParser(
+        description="Single WAV inference with Qwen3-Omni (speaker diarization + ASR)"
+    )
+    parser.add_argument("--model", type=str,
+                        default="Qwen/Qwen3-Omni-30B-A3B-Instruct")
+    parser.add_argument("--audio-path", "-a", type=str, required=True,
+                        help="Path to the input WAV file.")
+    parser.add_argument("--output-dir", type=str, default="output",
+                        help="Directory to save STM / text / JSONL outputs.")
+    parser.add_argument("--sampling-rate", type=int, default=16000)
+    parser.add_argument("--num-prompts", type=int, default=1)
+    parser.add_argument("--stage-configs-path", type=str, default=None)
+    parser.add_argument("--log-stats", action="store_true", default=False)
+    parser.add_argument("--temperature", type=float, default=0.2)
+    parser.add_argument("--top_p", type=float, default=0.9)
+    parser.add_argument("--top_k", type=int, default=-1)
+    parser.add_argument("--max_tokens", type=int, default=32768)
+    parser.add_argument("--stage-init-timeout", type=int, default=6000)
+    parser.add_argument("--init-timeout", type=int, default=6000)
+    parser.add_argument("--py-generator", action="store_true", default=False)
+    parser.add_argument("--dtype", type=str, default="auto")
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    decode_single(args)
