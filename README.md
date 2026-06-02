@@ -27,7 +27,7 @@
 
 <div align="center">
   <h3>
-    Yuhang Dai<sup>1,2</sup><sup>*</sup>, Haopeng Lin<sup>1</sup><sup>*</sup>, Zhennan Lin<sup>2</sup>, Jiale Qian<sup>1</sup>, Jun Wu<sup>1</sup>, Hao Meng<sup>1</sup>, Hanke Xie<sup>1,4</sup>, Hanlin Wen<sup>1</sup>, Chuang Ding<sup>3</sup>, Shunshun Yin<sup>1</sup>, Ming Tao<sup>1</sup>, Lei Xie<sup>2</sup>, Xinsheng Wang<sup>1†</sup>
+    Yuhang Dai<sup>1,2</sup><sup>*</sup>, Haopeng Lin<sup>2</sup><sup>*</sup>, Zhennan Lin<sup>1</sup>, Jiale Qian<sup>2</sup>, Jun Wu<sup>2</sup>, Hao Meng<sup>2</sup>, Hanke Xie<sup>1,2</sup>, Hanlin Wen<sup>2</sup>, Chuang Ding<sup>3</sup>, Shunshun Yin<sup>2</sup>, Ming Tao<sup>2</sup>, Lei Xie<sup>1</sup>, Xinsheng Wang<sup>2†</sup>
   </h3>
 
   <p>
