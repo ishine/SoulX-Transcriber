@@ -29,7 +29,7 @@ python ./inference/infer.py \
   --output-dir $out_dir \
   --stage-configs-path $config_path \
   --temperature 0.9 \
-  --top_p 0.9 \
-  --top_k -1 \
-  --max_tokens 32768 \
+  --top-p 0.9 \
+  --top-k -1 \
+  --max-tokens 32768 \
 
