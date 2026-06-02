@@ -108,10 +108,16 @@ SoulX-Transcriber is a unified end-to-end large audio language model for **multi
       <td>40.40</td><td>30.82</td><td>32.97</td><td>2.15</td>
     </tr>
     <tr>
+      <td>Qwen3.5-omni†</td>
+      <td>22.33</td><td>15.13</td><td>14.71</td><td><b>-0.42</b></td>
+      <td>26.46</td><td><b>12.44</b></td><td><b>12.79</b></td><td>0.35</td>
+      <td>30.05</td><td>28.57</td><td>33.46</td><td>4.89</td>
+    </tr>
+    <tr>
       <td><b>SoulX-Transcriber</b></td>
-      <td><b>2.89</b></td><td><b>14.29</b></td><td><b>13.88</b></td><td><b>-0.41</b></td>
-      <td><b>4.63</b></td><td><b>12.43</b></td><td><b>12.53</b></td><td><b>0.10</b></td>
-      <td><b>9.53</b></td><td><u>25.28</u></td><td>32.81<td>7.53</td>
+      <td><b>2.89</b></td><td><b>14.16</b></td><td><b>13.90</b></td><td>-0.26</td>
+      <td><b>5.39</b></td><td><b>13.07</b></td><td>13.61</td><td><b>0.54</b></td>
+      <td><b>11.67</b></td><td><u>25.55</u></td><td>32.78<td>7.23</td>
     </tr>
   </tbody>
 </table>
