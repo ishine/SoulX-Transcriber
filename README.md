@@ -47,13 +47,11 @@
 
 ## 🎬 Demo Video
 
-</div>
 <div align="center">
 
 <https://github.com/user-attachments/assets/6cbb8176-092f-4ef9-a0ae-6e69c1b1683d>
 
 </div>
-
 
 Please visit our  ✨[demopage](https://soul-ailab.github.io/soulx-transcriber/)✨ for more demos.
 <!-- <div align="center">
