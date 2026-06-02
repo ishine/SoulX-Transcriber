@@ -249,11 +249,12 @@ pip install ms-swift
 
 ## Model Download
 
-We provide the pre-trained model weights on Hugging Face. You can download the model based on your requirements:
+We provide the pre-trained model weights on Hugging Face and modelscope. You can download the model based on your requirements:
 
 | Model Version | Description | Language | Download |
 | :--- | :--- | :---: | :---: |
-| **SoulX-Transcriber** | Full version of model after CPT and Scene-based. | ZH/EN | [🤗 Hugging Face](https://huggingface.co/Soul-AILab/SoulX-Transcriber) |
+| **SoulX-Transcriber** | Full version of SoulX-Transcriber | ZH/EN | [🤗 Hugging Face](https://huggingface.co/Soul-AILab/SoulX-Transcriber) |
+| **SoulX-Transcriber** | Full version of SoulX-Transcriber | ZH/EN | [<img src="https://avatars.githubusercontent.com/u/109945100?s=48&v=4" width="20" height="20" alt="ModelScope" /> ModelScope](https://modelscope.cn/models/Soul-AILab/SoulX-Transcriber) |
 
 ## Training & Fine-tuning
 SoulX-Transcriber shares the same architecture with Qwen3-Omni-30BA3B-Instruct. We recommend users conduct continued pre-training and fine-tuning for this model via the [ms-swift](https://github.com/modelscope/ms-swift) toolkit.
