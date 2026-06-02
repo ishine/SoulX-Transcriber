@@ -53,7 +53,7 @@ Please visit our  ✨[demopage](https://soul-ailab.github.io/soulx-transcriber/)
 
 ## 🏆 SoulX-Transcriber performance Overview
 <div align="center">
-  <img src="figs/results-overview.png" width="80%" alt="Demo image">
+  <img src="figs/performance.png" width="80%" alt="Demo image">
 </div>
 
 
